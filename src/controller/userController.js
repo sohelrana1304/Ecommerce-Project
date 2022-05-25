@@ -168,9 +168,9 @@ const updateUserList = async (req, res) => {
         // Validate body
         const body = req.body
         // const reqBody = JSON.parse(req.body.data)
-        if (!validation.isValidRequestBody(body)) {
-            return res.status(400).send({ status: false, msg: "Details must be present to update" })
-        }
+        // if (!validation.isValidRequestBody(body)) {
+        //     return res.status(400).send({ status: false, msg: "Details must be present to update" })
+        // }
 
         // Validate params
         userId = req.params.userId
@@ -255,7 +255,7 @@ const updateUserList = async (req, res) => {
             if (!validation.isValid(password)) {
                 return res.status(400).send({ status: false, message: 'password is required' })
             }
-            if (validation.isValidPassword(password)) {
+            if (!validation.isValidPassword(password)) {
                 return res.status(400).send({ status: false, message: "Password should be Valid min 8 character and max 15 " })
             }
             const encrypt = await bcrypt.hash(password, 10)
@@ -315,6 +315,7 @@ const updateUserList = async (req, res) => {
         let files = req.files;
         if (files && files.length > 0) {
             console.log(files)
+
             let uploadedFileURL = await aws.uploadFile(files[0]);
             if (uploadedFileURL) {
                 updatedData['profileImage'] = uploadedFileURL
