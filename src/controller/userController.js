@@ -167,7 +167,10 @@ const updateUserList = async (req, res) => {
     try {
         // Validate body
         const body = req.body
-        // const reqBody = JSON.parse(req.body.data)
+        //const reqBody = JSON.parse(req.body.data)
+       
+
+
         // if (!validation.isValidRequestBody(body)) {
         //     return res.status(400).send({ status: false, msg: "Details must be present to update" })
         // }
@@ -311,8 +314,11 @@ const updateUserList = async (req, res) => {
             }
         }
 
-
         let files = req.files;
+        if(files){
+        if(files.length == 0) return res.status(400).send({status: false, msg:"No File to update"})
+        }
+        
         if (files && files.length > 0) {
             console.log(files)
 
