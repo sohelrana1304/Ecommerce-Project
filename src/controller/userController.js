@@ -168,7 +168,7 @@ const updateUserList = async (req, res) => {
         // Validate body
         const body = req.body
         //const reqBody = JSON.parse(req.body.data)
-       
+
 
 
         // if (!validation.isValidRequestBody(body)) {
@@ -198,28 +198,28 @@ const updateUserList = async (req, res) => {
         let updatedData = {}
 
         // console.log(fname)
-        if (fname == "") return res.status(400).send({status: false, msg: "fname not valid" })
+        if (fname == "") return res.status(400).send({ status: false, msg: "fname not valid" })
 
         // console.log("hyuoy")
         if (fname) {
             if (!validation.isValid(fname)) {
-                return res.status(400).send({status: false, msg: "not valid fname" })
+                return res.status(400).send({ status: false, msg: "not valid fname" })
             }
             let Pattern = /^[a-zA-Z ]*$/;
-            if (!(Pattern.test(fname))) return res.status(400).send({status: false, msg: "fname not valid regex" })
+            if (!(Pattern.test(fname))) return res.status(400).send({ status: false, msg: "fname not valid regex" })
 
             updatedData['fname'] = fname
 
         }
 
         // console.log("iuniuin")
-        if (lname == "") return res.status(400).send({status: false, msg: "lname not valid" })
+        if (lname == "") return res.status(400).send({ status: false, msg: "lname not valid" })
         if (lname) {
             if (!validation.isValid(lname)) {
-                return resstatus(400).send({ status: false,msg: "not valid lname" })
+                return resstatus(400).send({ status: false, msg: "not valid lname" })
             }
             let Pattern = /^[a-zA-Z ]*$/;
-            if (!(Pattern.test(lname))) return res.status(400).send({status: false, msg: "lname not valid regex" })
+            if (!(Pattern.test(lname))) return res.status(400).send({ status: false, msg: "lname not valid regex" })
 
             updatedData['lname'] = lname
         }
@@ -284,7 +284,7 @@ const updateUserList = async (req, res) => {
                     updatedData['address.shipping.city'] = addresss.shipping.city
                 }
                 if (addresss.shipping.pincode) {
-                  
+
                     if (!validation.isValidPincode(addresss.shipping.pincode)) {
                         return res.status(400).send({ status: false, msg: "Invalid Shipping pincode" })
                     }
@@ -305,7 +305,7 @@ const updateUserList = async (req, res) => {
                     updatedData['address.billing.city'] = addresss.billing.city
                 }
                 if (addresss.billing.pincode) {
-               
+
                     if (!validation.isValidPincode(addresss.billing.pincode)) {
                         return res.status(400).send({ status: false, msg: "Invalid billing pincode" })
                     }
@@ -315,10 +315,10 @@ const updateUserList = async (req, res) => {
         }
 
         let files = req.files;
-        if(files){
-        if(files.length == 0) return res.status(400).send({status: false, msg:"No File to update"})
+        if (files) {
+            if (files.length == 0) return res.status(400).send({ status: false, msg: "No File to update" })
         }
-        
+
         if (files && files.length > 0) {
             console.log(files)
 
@@ -330,7 +330,7 @@ const updateUserList = async (req, res) => {
             }
         }
         const updated = await userModel.findOneAndUpdate({ _id: userId }, updatedData, { new: true })
-        
+
         return res.status(201).send({ status: true, data: updated })
     } catch (err) {
         console.log(err)

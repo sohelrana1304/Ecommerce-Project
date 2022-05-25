@@ -2,27 +2,30 @@ const mongoose = require('mongoose')
 
 const productSchema = new mongoose.Schema({
 
-    
-        title: {type:String, required: true, unique: true},
-        description: {type:String, required: true},
-        price: {type:Number, required: true}, //number and decimal
-        currencyId: {type:String, required: true, default:"INR"},
-        currencyFormat: {type:String, required: true, default:"₹"},
-        isFreeShipping: {type: Boolean, default: false},
-        productImage: {type:String, required: true},  // s3 link
-        style: {type: String},
-        availableSizes: {
-            type: [String],
-            required: true,
-            enum:["S", "XS","M","X", "L","XXL", "XL"]
-        },
-        installments: {Number},
-        deletedAt: {
-            type: Date
-        }, 
-        isDeleted: {type:Boolean, default: false}
-    
+    title: { type: String, required: true, unique: true },
 
-},{timestamps: true}) 
+    description: { type: String, required: true },
 
-module.exports =  mongoose.model("product", productSchema)
+    price: { type: Number, required: true }, //number and decimal
+
+    currencyId: { type: String, required: true /* default: "INR" */ },
+
+    currencyFormat: { type: String, required: true /* default: "₹"  */},
+
+    isFreeShipping: { type: Boolean, default: false },
+
+    productImage: { type: String, required: true },  // s3 link
+
+    style: { type: String },
+
+    availableSizes: { type: [String], required: true, enum: ["S", "XS", "M", "X", "L", "XXL", "XL"] },
+
+    installments: { type: Number },
+
+    deletedAt: { type: Date, default: null },
+
+    isDeleted: { type: Boolean, default: false }
+
+}, { timestamps: true })
+
+module.exports = mongoose.model("product", productSchema)
