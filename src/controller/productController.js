@@ -58,6 +58,109 @@ const createProduct = async function (req, res) {
 
 }
 
+
+const getproduct = async (req, res) => {
+    try {
+        let filterQuery = req.query;
+        let { size, name, priceGreaterThan, priceLessThan, priceSort } = filterQuery;
+       
+            let query = {}
+            query['isDeleted'] = false;
+
+            if (size) {
+                query['availableSizes'] = size
+            }
+            if (name) {
+                name = name.trim()
+                query['title'] = { $regex: name }
+            }
+            if (priceGreaterThan) {
+                query['price'] = { $gt: priceGreaterThan }
+            }
+            if (priceLessThan) {
+                query['price'] = { $lt: priceLessThan }
+            }
+            if (priceGreaterThan && priceLessThan) {
+                query['price'] = { '$gt': priceGreaterThan, '$lt': priceLessThan }
+            }
+            if (priceSort) {
+                if (priceSort == -1 || priceSort == 1) {
+                    query['priceSort'] = priceSort
+                } else {
+                    return res.status(400).send({ status: false, message: "Please provide valid value of priceSort" })
+                }
+            }
+
+             let getAllProducts = await productModel.find(query)                         //.sort({ price: query.priceSort })
+            const countproducts = getAllProducts.length 
+            if (!(countproducts > 0)) {
+                return res.status(404).send({ status: false, msg: "No products found" })
+            }
+            return res.status(200).send({ status: true, message: `${countproducts} Products Found`, data: getAllProducts });
+      
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send({ status: false, msg: err.message })
+
+    }
+}
+
+const getProductList = async (req, res) => {
+    try {
+        let productId = req.params.productId
+        // console.log(userId)
+        
+    
+        if (!validation.isValidObjectId(productId)) 
+        {return res.status(400).send({ status: false, message: "productId  is not valid" })}
+
+        let checkData = await productModel.findOne({ _id: productId });
+        
+        if (!checkData) return res.status(404).send({ status: false, msg: "There is no product exist with this id" });
+
+        if(checkData.isDeleted==true) return res.status(400).send({ status: false, msg: "Product is already deleted" });
+
+
+        return res.status(200).send({ status: true, message: 'Product profile details', data: checkData });
+    }
+    catch (err) {
+        //console.log(err)
+        return res.status(500).send({ status: false, msg: err.message });
+    }
+}
+
+const deletedProduct = async function (req, res) {
+    try {
+       
+        let productId = req.params.productId
+     
+        if (!validation.isValidObjectId(productId)) {
+            return res.status(404).send({ status: false, message: "Product id is not valid" })
+        }
+        let deleteBook = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false },
+            { $set: { isDeleted: true, deletedAt: new Date() } })
+
+        if (deleteBook == null) return res.status(404).send({ status: false, message: "Product is already deleted" })
+
+        return res.status(200).send({ status: true, message: "Product has been deleted successfully" })
+
+    }
+    catch (err) {
+        console.log("This is the error :", err.message)
+        res.status(500).send({ msg: "Error", error: err.message })
+    }
+}
+
+
+
+
+
+
+
+
 module.exports.createProduct = createProduct
+module.exports.getproduct = getproduct
+module.exports.getProductList = getProductList
+module.exports.deletedProduct = deletedProduct
 
 
