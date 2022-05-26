@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt")
 const validation = require("../validations/validation")
 const jwt = require("jsonwebtoken")
 const aws = require("./aws")
-const middleware = require('../middleware/authorization')
+
 //const { json } = require("express/lib/response")
 
 const createUser = async function (req, res) {
@@ -206,7 +206,7 @@ const updateUserList = async (req, res) => {
                 return res.status(400).send({ status: false, msg: "not valid fname" })
             }
             let Pattern = /^[a-zA-Z ]*$/;
-            if (!(Pattern.test(fname))) return res.status(400).send({ status: false, msg: "fname not valid regex" })
+            if (!(Pattern.test(fname))) return res.status(400).send({ status: false, msg: "not a valid format for fname" })
 
             updatedData['fname'] = fname
 
@@ -219,7 +219,7 @@ const updateUserList = async (req, res) => {
                 return resstatus(400).send({ status: false, msg: "not valid lname" })
             }
             let Pattern = /^[a-zA-Z ]*$/;
-            if (!(Pattern.test(lname))) return res.status(400).send({ status: false, msg: "lname not valid regex" })
+            if (!(Pattern.test(lname))) return res.status(400).send({ status: false, msg: "not a valid lname" })
 
             updatedData['lname'] = lname
         }

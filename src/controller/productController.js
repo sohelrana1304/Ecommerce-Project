@@ -11,7 +11,7 @@ const createProduct = async function (req, res) {
 
         if (!validation.isValidRequestBody(data)) return res.status(400).send({ status: false, msg: "please provoide the data" })
 
-        let { title, description, price, currencyId, currencyFormat, style, availableSizes, installments } = data
+        let { title, description, price, currencyId, currencyFormat, style, isFreeShipping, availableSizes, installments } = data
 
         if (!validation.isValid(title)) return res.status(400).send({ status: false, msg: "title or title feild is requried" })
         let uniquetitle = await productModel.findOne({ title: title });
@@ -31,8 +31,8 @@ const createProduct = async function (req, res) {
             if (!validation.isValid(style)) return res.status(400).send({ status: false, msg: "Style feild is requried" })
         }
 
-        if (["S", "XS", "M", "X", "L", "XXL", "XL"].indexOf(availableSizes) == -1)
-            return res.status(400).send({ status: false, message: "Available sizes should be - S, XS, M, X, L, XXL, XL" })
+        // if (["S", "XS", "M", "X", "L", "XXL", "XL"].indexOf(availableSizes) == -1)
+        //     return res.status(400).send({ status: false, message: "Available sizes should be - S, XS, M, X, L, XXL, XL" })
 
         if (installments) {
             let onlyNumber = /^[0-9]{1,}$/
@@ -43,11 +43,30 @@ const createProduct = async function (req, res) {
         if (files && files.length == 0) {
             return res.status(400).send({ msg: "No file found" })
         }
-        let uploadedFileURL = await aws.uploadFile(files[0])
+        //let uploadedFileURL = await aws.uploadFile(files[0])
 
-        data.productImage = uploadedFileURL
+       let  productPicture = await aws.uploadFile(files[0])
 
-        const createProduct = await productModel.create(data)
+        // data.productImage = uploadedFileURL
+
+
+        let productRegister = { title, description, price, currencyId, currencyFormat, productImage: productPicture,isFreeShipping, style, availableSizes, installments }
+// let array = "X MK K"
+
+        if (availableSizes) {
+            let array = availableSizes.split(" ").map(x => x.trim()) //this will split the available sizes and give it an array
+            //console.log(array)
+            for (let i = 0; i < array.length; i++) {
+                if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(array[i]))) {
+                    return res.status(400).send({ status: false, msg: `Available sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"].join(',')}` })
+                }
+            }
+            if (Array.isArray(array)) {
+                productRegister['availableSizes'] = array
+            }
+        }
+
+        const createProduct = await productModel.create(productRegister)
 
         return res.status(201).send({status:true, msg: "Product created successfully", data:createProduct})
 
