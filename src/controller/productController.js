@@ -49,7 +49,7 @@ const createProduct = async function (req, res) {
 
         const createProduct = await productModel.create(data)
 
-        return res.status(400).send({status:true, msg: "Product created successfully", data:createProduct})
+        return res.status(201).send({status:true, msg: "Product created successfully", data:createProduct})
 
     }
     catch (err) {
@@ -118,7 +118,7 @@ const getProductList = async (req, res) => {
         
         if (!checkData) return res.status(404).send({ status: false, msg: "There is no product exist with this id" });
 
-        if(checkData.isDeleted==true) return res.status(400).send({ status: false, msg: "Product is already deleted" });
+        if(checkData.isDeleted==true) return res.status(404).send({ status: false, msg: "Product is already deleted" });
 
 
         return res.status(200).send({ status: true, message: 'Product profile details', data: checkData });
