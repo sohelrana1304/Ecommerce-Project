@@ -238,7 +238,7 @@ const updateProduct = async function (req, res) {
             if (price <= 0) return res.status(400).send({ status: false, msg: "Price have to be more than Rupees O [Zero]" })
 
 
-            let Pattern = /^[0-9 ]*$/;
+            let Pattern = /^[0-9]+\.?[0-9]+$/;
             if (!(Pattern.test(price))) return res.status(400).send({ status: false, msg: "not a valid price" })
 
             updatedbody['price'] = price
