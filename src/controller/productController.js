@@ -55,7 +55,7 @@ const createProduct = async function (req, res) {
 
         if (availableSizes) {
             let array = availableSizes.split(" ").map(x => x.trim()) //this will split the available sizes and give it an array
-            //console.log(array)
+            console.log(array)
             for (let i = 0; i < array.length; i++) {
                 if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(array[i]))) {
                     return res.status(400).send({ status: false, msg: `Available sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"].join(',')}` })
@@ -63,7 +63,7 @@ const createProduct = async function (req, res) {
             }
             if (Array.isArray(array)) {
                 productRegister['availableSizes'] = array
-            }
+           }
         }
 
         const createProduct = await productModel.create(productRegister)
@@ -169,6 +169,11 @@ const deletedProduct = async function (req, res) {
         res.status(500).send({ msg: "Error", error: err.message })
     }
 }
+
+// const updateProduct = async function (req, res) {
+//     let data = req.body 
+    
+// }
 
 
 

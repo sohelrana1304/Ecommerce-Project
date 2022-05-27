@@ -329,7 +329,7 @@ const updateUserList = async (req, res) => {
                 res.status(400).send({ status: false, msg: "File not Found" })
             }
         }
-        const updated = await userModel.findOneAndUpdate({ _id: userId }, updatedData)
+        const updated = await userModel.findOneAndUpdate({ _id: userId }, updatedData)  
 
         return res.status(201).send({ status: true, data: updated })
     } catch (err) {
