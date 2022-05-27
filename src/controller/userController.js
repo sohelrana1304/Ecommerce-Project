@@ -329,6 +329,10 @@ const updateUserList = async (req, res) => {
                 res.status(400).send({ status: false, msg: "File not Found" })
             }
         }
+
+        //check it once.........................................................................................
+        if(updatedData==null){return res.status(400).send({ status: false, msg: "give some data for update" })}
+        
         const updated = await userModel.findOneAndUpdate({ _id: userId }, updatedData)
 
         return res.status(201).send({ status: true, data: updated })

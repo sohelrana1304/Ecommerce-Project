@@ -17,11 +17,14 @@ router.put('/user/:userId/profile', middleware.authorizatoion ,userController.up
 
 router.post('/products', productController.createProduct)
 
+
 router.get('/products', productController.getproduct)
 
 router.get('/products/:productId', productController.getProductList)
 
 router.delete("/products/:productId", productController.deletedProduct)
 
+
+router.put('/products/:productId' ,productController.updateProduct)
 
 module.exports = router
