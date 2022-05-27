@@ -45,16 +45,16 @@ const createProduct = async function (req, res) {
         }
         //let uploadedFileURL = await aws.uploadFile(files[0])
 
-       let  productPicture = await aws.uploadFile(files[0])
+        let productPicture = await aws.uploadFile(files[0])
 
         // data.productImage = uploadedFileURL
 
 
-        let productRegister = { title, description, price, currencyId, currencyFormat, productImage: productPicture,isFreeShipping, style, availableSizes, installments }
-// let array = "X MK K"
+        let productRegister = { title, description, price, currencyId, currencyFormat, productImage: productPicture, isFreeShipping, style, availableSizes, installments }
+        // let array = "X MK K"
 
         if (availableSizes) {
-            let array = availableSizes.split(" ").map(x => x.trim()) //this will split the available sizes and give it an array
+            let array = availableSizes.split(",").map(x => x.trim()) //this will split the available sizes and give it an array
             //console.log(array)
             for (let i = 0; i < array.length; i++) {
                 if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(array[i]))) {
@@ -68,7 +68,7 @@ const createProduct = async function (req, res) {
 
         const createProduct = await productModel.create(productRegister)
 
-        return res.status(201).send({status:true, msg: "Product created successfully", data:createProduct})
+        return res.status(201).send({ status: true, msg: "Product created successfully", data: createProduct })
 
     }
     catch (err) {
@@ -82,41 +82,44 @@ const getproduct = async (req, res) => {
     try {
         let filterQuery = req.query;
         let { size, name, priceGreaterThan, priceLessThan, priceSort } = filterQuery;
-       
-            let query = {}
-            query['isDeleted'] = false;
 
-            if (size) {
-                query['availableSizes'] = size
-            }
-            if (name) {
-                name = name.trim()
-                query['title'] = { $regex: name }
-            }
-            if (priceGreaterThan) {
-                query['price'] = { $gt: priceGreaterThan }
-            }
-            if (priceLessThan) {
-                query['price'] = { $lt: priceLessThan }
-            }
-            if (priceGreaterThan && priceLessThan) {
-                query['price'] = { '$gt': priceGreaterThan, '$lt': priceLessThan }
-            }
-            if (priceSort) {
-                if (priceSort == -1 || priceSort == 1) {
-                    query['priceSort'] = priceSort
-                } else {
-                    return res.status(400).send({ status: false, message: "Please provide valid value of priceSort" })
-                }
-            }
+        let query = {}
+        query['isDeleted'] = false;
 
-             let getAllProducts = await productModel.find(query)                         //.sort({ price: query.priceSort })
-            const countproducts = getAllProducts.length 
-            if (!(countproducts > 0)) {
-                return res.status(404).send({ status: false, msg: "No products found" })
+        if (size) {
+            let array = size.split(",").map(x => x.trim())
+            query['availableSizes'] = array
+        }
+        if (name) {
+            name = name.trim()
+            const regexName = new RegExp(name, "i")
+            query['title'] = { $regex: regexName }
+        }
+        if (priceGreaterThan) {
+            query['price'] = { $gt: priceGreaterThan }
+        }
+        if (priceLessThan) {
+            query['price'] = { $lt: priceLessThan }
+        }
+        if (priceGreaterThan && priceLessThan) {
+            query['price'] = { '$gt': priceGreaterThan, '$lt': priceLessThan }
+        }
+
+        if (priceSort) {
+            if (priceSort == -1 || priceSort == 1) {
+                query['priceSort'] = priceSort
+            } else {
+                return res.status(400).send({ status: false, message: "Please provide valid value of priceSort" })
             }
-            return res.status(200).send({ status: true, message: `${countproducts} Products Found`, data: getAllProducts });
-      
+        }
+
+        let getAllProducts = await productModel.find(query).sort({ price: query.priceSort })
+        const countproducts = getAllProducts.length
+        if (!(countproducts > 0)) {
+            return res.status(404).send({ status: false, msg: "No products found" })
+        }
+        return res.status(200).send({ status: true, message: `${countproducts} Products Found`, data: getAllProducts });
+
     } catch (err) {
         console.log(err)
         return res.status(500).send({ status: false, msg: err.message })
@@ -128,17 +131,15 @@ const getProductList = async (req, res) => {
     try {
         let productId = req.params.productId
         // console.log(userId)
-        
-    
-        if (!validation.isValidObjectId(productId)) 
-        {return res.status(400).send({ status: false, message: "productId  is not valid" })}
+
+
+        if (!validation.isValidObjectId(productId)) { return res.status(400).send({ status: false, message: "productId  is not valid" }) }
 
         let checkData = await productModel.findOne({ _id: productId });
-        
+
         if (!checkData) return res.status(404).send({ status: false, msg: "There is no product exist with this id" });
 
-        if(checkData.isDeleted==true) return res.status(404).send({ status: false, msg: "Product is already deleted" });
-
+        if (checkData.isDeleted == true) return res.status(404).send({ status: false, msg: "Product is already deleted" });
 
         return res.status(200).send({ status: true, message: 'Product profile details', data: checkData });
     }
@@ -150,9 +151,9 @@ const getProductList = async (req, res) => {
 
 const deletedProduct = async function (req, res) {
     try {
-       
+
         let productId = req.params.productId
-     
+
         if (!validation.isValidObjectId(productId)) {
             return res.status(404).send({ status: false, message: "Product id is not valid" })
         }
