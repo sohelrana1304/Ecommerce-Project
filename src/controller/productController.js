@@ -43,7 +43,7 @@ const createProduct = async function (req, res) {
         if (files && files.length == 0) {
             return res.status(400).send({ msg: "No file found" })
         }
-       
+
 
         let productPicture = await aws.uploadFile(files[0])
 
@@ -54,11 +54,11 @@ const createProduct = async function (req, res) {
             }
         }
         let productRegister = { title, description, price, currencyId, currencyFormat, productImage: productPicture, isFreeShipping, style, availableSizes, installments }
-       
+
 
         if (availableSizes) {
             let array = availableSizes.split(",").map(x => x.trim()) //this will split the available sizes and give it an array
-           
+
             for (let i = 0; i < array.length; i++) {
                 if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(array[i]))) {
                     return res.status(400).send({ status: false, msg: `Available sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"].join(',')}` })
@@ -213,7 +213,7 @@ const updateProduct = async function (req, res) {
             if (!validation.isValid(title)) {
                 return res.status(400).send({ status: false, msg: "not valid title" })
             }
-             let Pattern = /^[a-zA-Z0-9 ]*$/;
+            let Pattern = /^[a-zA-Z0-9 ]*$/;
             if (!(Pattern.test(title))) return res.status(400).send({ status: false, msg: "not a valid format for title" })
             const duplicatTitle = await productModel.findOne({ title: title })
             if (duplicatTitle) {
@@ -243,7 +243,7 @@ const updateProduct = async function (req, res) {
             if (price <= 0) return res.status(400).send({ status: false, msg: "Price have to be more than Rupees O [Zero]" })
 
 
-            let Pattern = /^[0-9 ]*$/;
+            let Pattern = /^[0-9]+\.?[0-9]+$/;
             if (!(Pattern.test(price))) return res.status(400).send({ status: false, msg: "not a valid price" })
 
             updatedbody['price'] = price
@@ -265,10 +265,9 @@ const updateProduct = async function (req, res) {
 
 
         if (isFreeShipping) {
-
-            if (!((isFreeShipping === "true") || (isFreeShipping === "false"))) 
+            if (!((isFreeShipping === "true") || (isFreeShipping === "false")))
                 return res.status(400).send({ status: false, message: 'isFreeShipping should be true or false' })
-                updatedbody['isFreeShipping'] = isFreeShipping
+            updatedbody['isFreeShipping'] = isFreeShipping
         }
         if (style) {
             if (!validation.isValid(style)) return res.status(400).send({ status: false, msg: "Style feild is requried" })
@@ -300,10 +299,10 @@ const updateProduct = async function (req, res) {
         }
 
         //check it once.........................................................................................
-console.log(updatedbody)
+        console.log(updatedbody)
         if (!validation.isValidRequestBody(updatedbody)) { return res.status(400).send({ status: false, msg: "give some body for update" }) }
 
-        const updated = await productModel.findByIdAndUpdate({ _id: productId }, updatedbody,{new:true})
+        const updated = await productModel.findByIdAndUpdate({ _id: productId }, updatedbody, { new: true })
 
         return res.status(201).send({ status: true, body: updated })
 
