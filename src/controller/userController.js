@@ -148,7 +148,7 @@ const getUserList = async (req, res) => {
 
         if ((!validation.isValidObjectId(userId) && !validation.isValidObjectId(tokenId))) return res.status(400).send({ status: false, message: "userId or tokenid is not valid" });;
 
-        let checkData = await userModel.findOne({ _id: userId });
+        let checkData = await userModel.findById({ _id: userId });
         if (!checkData) return res.status(404).send({ status: false, msg: "There is no user exist with this id" });
 
         if (!(userId == tokenId)) return res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
@@ -329,7 +329,11 @@ const updateUserList = async (req, res) => {
                 res.status(400).send({ status: false, msg: "File not Found" })
             }
         }
-        const updated = await userModel.findOneAndUpdate({ _id: userId }, updatedData)  
+
+        //check it once.........................................................................................
+        if(updatedData==null){return res.status(400).send({ status: false, msg: "give some data for update" })}
+        
+        const updated = await userModel.findOneAndUpdate({ _id: userId }, updatedData)
 
         return res.status(201).send({ status: true, data: updated })
     } catch (err) {
