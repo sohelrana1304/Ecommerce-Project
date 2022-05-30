@@ -13,6 +13,11 @@ const createCart = async function (req, res) {
         let pId = data.productId;
         let uId = req.params.userId;
 
+         // Authentication
+         let tokenId = req.userId
+         // console.log(tokenId)
+         if (tokenId != uId) return res.status(401).send({ status: false, message: "Unauthorised Access" })
+
         if (!cId) {
             let cartExistforUser = await cartModel.findOne({ userId: uId })
             if (cartExistforUser) {
@@ -102,18 +107,9 @@ const createCart = async function (req, res) {
 
         }
 
-        //if (Object.keys(uId) == 0) { return res.status(400).send({ status: false, message: "Please provide User Id " }) }
 
-        let userExist = await userModel.findOne({ _id: uId });
-        if (!userExist) {
-            return res.status(404).send({ status: false, message: `No user found with this ${uId}` })
-        }
-
-
-        let cartExist = await cartModel.findOne({ _id: cId });
-        // let onlyCartId = cartExist.userId.toString()
         if (cartExist) {
-            // console.log(onlyCartId)
+            
             if (cartExist.userId != uId) {
                 return res.status(403).send({ status: false, message: "This cart does not belong to you. Please check the cart Id" })
             }
@@ -138,10 +134,6 @@ const createCart = async function (req, res) {
                 return res.status(200).send({ status: true, message: "Updated Cart", data: updatedCart })
             }
 
-            // let updateData = {}
-
-            // if (cartExist.items[i].productId == uId)
-
             for (let i = 0; i < cartExist.items.length; i++) {
                 if (cartExist.items[i].productId == pId) {
                     // console.log(i)
@@ -161,8 +153,7 @@ const createCart = async function (req, res) {
             for (let j = 0; j < cartExist.items.length; j++) {
 
                 if (cartExist.items[j].productId != pId) {
-                    // console.log(j)
-                    // console.log(cartExist.items.length - 1)
+                  
                     const obj = { productId: pId, quantity: 1 }
                     let arr = cartExist.items
                     arr.push(obj)
@@ -246,10 +237,10 @@ const deleteCartProducts = async function (req, res) {
         let findUser = await userModel.findById({ _id: userId })
         if (!findUser) return res.status(404).send({ status: false, message: "User not found" })
 
-        // // Authentication
-        // let tokenId = req.userId
-        // // console.log(tokenId)
-        // if (tokenId != userId) return res.status(401).send({ status: false, message: "Unauthorised Access" })
+        // Authentication
+        let tokenId = req.userId
+        // console.log(tokenId)
+        if (tokenId != userId) return res.status(401).send({ status: false, message: "Unauthorised Access" })
 
         let findCart = await cartModel.findOne({ userId: userId })
         // console.log(findCart)

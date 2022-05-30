@@ -28,13 +28,13 @@ router.put('/products/:productId' ,productController.updateProduct)
 
 
 
-router.post("/users/:userId/cart", cartController.createCart)
+router.post("/users/:userId/cart", middleware.authorizatoion, cartController.createCart)
 
 router.get("/users/:userId/cart", middleware.authorizatoion, cartController.getCartData)
 
-router.delete("/users/:userId/cart",/*  middleware.authorizatoion, */ cartController.deleteCartProducts)
+router.delete("/users/:userId/cart", middleware.authorizatoion, cartController.deleteCartProducts)
 
-router.put("/users/:userId/cart", /* middleware.authorizatoion, */ cartController.updateCart)
+router.put("/users/:userId/cart", middleware.authorizatoion, cartController.updateCart)
 
 
 
