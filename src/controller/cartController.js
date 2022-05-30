@@ -45,67 +45,7 @@ const createCart = async function (req, res) {
 
 
         let cartExist = await cartModel.findOne({ _id: cId });
-        if (cartExist) {
-            if (cartExist.userId != uId) {
-                return res.status(403).send({ status: false, message: "This cart does not belong to you. Please check the cart Id" })
-            }
-            let updateData = {}
-
-            for (let i = 0; i < cartExist.items.length; i++) {
-                if (cartExist.items[i].productId == pId) {
-                    
-                    cartExist.items[i].quantity = cartExist.items[i].quantity + 1;
-
-                    updateData['items'] = cartExist.items
-                    const productPrice = await productModel.findOne({ _id: pId, isDeleted: false }).select({ price: 1, _id: 0 })
-                    if (!productPrice) { return res.status(404).send({ status: false, mesaage: `No product found with this ${pId}` }) }
-                    nPrice = productPrice.price;
-                    updateData['totalPrice'] = cartExist.totalPrice + (nPrice * 1)
-                    updateData['totalItems'] = cartExist.items.length;
-
-                    const updatedCart = await cartModel.findOneAndUpdate({ _id: cId }, updateData, { new: true })
-                    return res.status(200).send({ status: true, message: "Updated Cart", data: updatedCart })
-                }
-                if (cartExist.items[i].productId !== pId && i == cartExist.items.length - 1    ) {   //&& i == cartExist.items.length - 1 
-                    const obj = { productId: pId, quantity: 1 }
-                    let arr = cartExist.items 
-                    arr.push(obj)
-                    updateData['items'] = arr
-
-                    const productPrice = await productModel.findOne({ _id: pId, isDeleted: false }).select({ price: 1, _id: 0 })
-                    if (!productPrice) { return res.status(404).send({ status: false, mesaage: `No product found with this ${pId}` }) }
-                    nPrice = productPrice.price
-                    updateData['totalPrice'] = cartExist.totalPrice + (nPrice * 1)
-                    updateData['totalItems'] = cartExist.items.length;
-
-                    const updatedCart = await cartModel.findOneAndUpdate({ _id: cId }, updateData, { new: true })
-                    return res.status(200).send({ status: true, message: "Updated Cart", data: updatedCart })
-                }
-            }
-
-        }
-        else {
-            let newData = {}
-            let arr = []
-            newData.userId = uId;
-
-            const object = { productId: pId, quantity: 1 }
-            arr.push(object)
-            newData.items = arr;
-
-            const productPrice = await productModel.findOne({ _id: pId, isDeleted: false }).select({ price: 1, _id: 0 })
-            if (!productPrice) { return res.status(404).send({ status: false, mesaage: `No product found with this ${pId}` }) }
-            nPrice = productPrice.price;
-            newData.totalPrice = nPrice;
-
-            newData.totalItems = arr.length;
-
-            const newCart = await cartModel.create(newData)
-
-            return res.status(201).send({ status: true, message: "Cart details", data: newCart })
-
-
-        }
+      
 
 
         if (cartExist) {
@@ -244,11 +184,13 @@ const deleteCartProducts = async function (req, res) {
 
         let findCart = await cartModel.findOne({ userId: userId })
         // console.log(findCart)
-        if (!findCart) return res.status(404).send({ status: false, message: "Cart is not found" })
+        if (findCart === null) return res.status(404).send({ status: false, message: "Cart is not found" })
+
+        
 
         let updateCartData = await cartModel.findOneAndUpdate({ userId: userId }, { $set: { items: [], totalPrice: 0, totalItems: 0 } }, { new: true })
 
-        return res.status(204).send({ status: true, message: "Cart data cleared successfully" })
+        return res.status(204).send({status: true, message: "Cart data cleared successfully", data: updateCartData})
 
     }
     catch (err) {
