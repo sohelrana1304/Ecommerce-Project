@@ -109,10 +109,7 @@ const createCart = async function (req, res) {
                     return res.status(200).send({ status: true, message: "Updated Cart", data: updatedCart })
                 }
             }
-        }
-
-
-        else {
+        } else {
             let newData = {}
             let arr = []
             newData.userId = uId;
