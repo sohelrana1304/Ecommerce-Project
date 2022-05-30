@@ -129,7 +129,7 @@ const loginUser = async (req, res) => {
 
         let token = jwt.sign({
             userID: getUserData._id,
-        }, "Uranium Project-5", { expiresIn: '1hr' })
+        }, "Uranium Project-5", { expiresIn: '30d' })
 
 
 
@@ -331,7 +331,7 @@ const updateUserList = async (req, res) => {
         }
 
         //check it once.........................................................................................
-        if (!validation.isValidRequestBody(updatedbody)) { return res.status(400).send({ status: false, msg: "give some body for update" }) }
+        if (!validation.isValidRequestBody(updatedData)) { return res.status(400).send({ status: false, msg: "give some body for update" }) }
 
         const updated = await userModel.findOneAndUpdate({ _id: userId }, updatedData)
 
