@@ -2,8 +2,6 @@ const cartModel = require("../models/cartModel")
 const userModel = require("../models/userModel")
 const productModel = require("../models/productModel")
 const validation = require('../validations/validation')
-// const mongoose = require('mongoose')
-// const ObjectId = mongoose.Schema.Types.ObjectId
 
 
 const createCart = async function (req, res) {
@@ -204,10 +202,17 @@ const deleteCartProducts = async function (req, res) {
 const updateCart = async function (req, res) {
     try {
         let userId = req.params.userId
-        // const idFromToken = req.userId
+        
         if (!validation.isValidObjectId(userId)) {
             return res.status(400).send({ status: false, msg: "userId is not a valid objectId" })
         }
+
+        
+        // Authentication
+        let tokenId = req.userId
+        // console.log(tokenId)
+        if (tokenId != userId) return res.status(401).send({ status: false, message: "Unauthorised Access" })
+
 
         let data = req.body
         const { cartId, productId, removeProduct } = data
@@ -246,12 +251,7 @@ const updateCart = async function (req, res) {
 
       
             if(cartDetails.items.length === 0) return res.status(404).send({status: false, msg:"No products to update"}) 
-           
-            // for (let k = 0; k >= cartDetails.items.length; k++){
-            //     console.log(cartDetails.items[k].productId)
-            //     console.log(productId)
-            //     if(cartDetails.items[k].productId != productId) return res.status(404).send({status: false, msg:"No product Found"})
-            // }
+         
             let arr=[]
         for(let k=0;k<cartDetails.items.length; k++)
        { arr.push(cartDetails.items[k].productId.toString())}
