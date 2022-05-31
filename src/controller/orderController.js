@@ -1,7 +1,7 @@
 const orderModel = require('../models/orderModel')
 const cartModel = require("../models/cartModel")
 const userModel = require("../models/userModel")
-const productModel = require("../models/productModel")
+// const productModel = require("../models/productModel")
 const validation = require('../validations/validation')
 const { findOne } = require('../models/orderModel')
 
@@ -20,7 +20,7 @@ const createOrder = async function(req, res){
         let findUser = await userModel.findOne({_id: userId})
         if(findUser == null) return res.status(404).send({status: false, message:"User not found"})
 
-        let findCart = await cartModel.findOne({userId: cartId})
+        let findCart = await cartModel.findOne({_id: cartId})
         if(findCart == null) return res.status(404).send({status: false, message:"Cart not found"})
 
         let findUserCart = await cartModel.findOne({userId: userId})
@@ -38,6 +38,8 @@ const createOrder = async function(req, res){
                 return res.status(400).send({ status: false, message: "Status should be 'pending', 'completed' or 'canclled'" })
             }
         }
+
+        if(findCart.items.length == 0) return res.status(400).send({ status: false, message: "Product is not added in this cart" })
 
         let totalQuantity = 0;
         for(let i=0; i<findCart.items.length; i++){

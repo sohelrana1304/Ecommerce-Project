@@ -313,17 +313,8 @@ const updateProduct = async function (req, res) {
 }
 
 
-
-
-
-
-
-
-
 module.exports.updateProduct = updateProduct
 module.exports.createProduct = createProduct
 module.exports.getproduct = getproduct
 module.exports.getProductList = getProductList
 module.exports.deletedProduct = deletedProduct
-
-
