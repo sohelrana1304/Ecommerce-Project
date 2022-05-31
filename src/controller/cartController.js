@@ -2,6 +2,8 @@ const cartModel = require("../models/cartModel")
 const userModel = require("../models/userModel")
 const productModel = require("../models/productModel")
 const validation = require('../validations/validation')
+// const mongoose = require('mongoose')
+// const ObjectId = mongoose.Schema.Types.ObjectId
 
 
 const createCart = async function (req, res) {
@@ -35,8 +37,11 @@ const createCart = async function (req, res) {
 
         if (!pId) { return res.status(400).send({ status: false, message: "Please provide Product Id " }) }
 
+        if(req.body.quantity) return res.status(400).send({status: false, msg:"Dont give qnt"})
+
 
         //if (Object.keys(uId) == 0) { return res.status(400).send({ status: false, message: "Please provide User Id " }) }
+        
 
         let userExist = await userModel.findOne({ _id: uId });
         if (!userExist) {
@@ -239,8 +244,23 @@ const updateCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "cart is not added for this cardId, create cart first" })
         }
 
+      
+            if(cartDetails.items.length === 0) return res.status(404).send({status: false, msg:"No products to update"}) 
+           
+            // for (let k = 0; k >= cartDetails.items.length; k++){
+            //     console.log(cartDetails.items[k].productId)
+            //     console.log(productId)
+            //     if(cartDetails.items[k].productId != productId) return res.status(404).send({status: false, msg:"No product Found"})
+            // }
+            let arr=[]
+        for(let k=0;k<cartDetails.items.length; k++)
+       { arr.push(cartDetails.items[k].productId.toString())}
+       if(arr.indexOf(productId)==-1)return res.status(400).send({ status: false, message: "productId is not found" })
+      
+
         if (removeProduct == 1) {
             for (let i = 0; i < cartDetails.items.length; i++) {
+               
                 if (cartDetails.items[i].productId == productId) {
                     let newPrice = cartDetails.totalPrice - productDetails.price
                     if (cartDetails.items[i].quantity > 1) {
@@ -256,6 +276,7 @@ const updateCart = async function (req, res) {
                         return res.status(200).send({ status: true, msg: "cart removed successfully", data: updatedDetails })
                     }
                 }
+               
             }
         }
 
