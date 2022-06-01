@@ -38,7 +38,7 @@ router.delete("/users/:userId/cart", middleware.authorizatoion, cartController.d
 router.put("/users/:userId/cart", middleware.authorizatoion, cartController.updateCart)
 
 
-router.post("/users/:userId/orders", /* middleware.authorizatoion, */ orderController.createOrder)
+router.post("/users/:userId/orders", middleware.authorizatoion, orderController.createOrder)
 
 
 
