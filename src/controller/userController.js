@@ -80,7 +80,7 @@ const createUser = async function (req, res) {
             //upload to s3 and get the uploaded link
             // res.send the link back to frontend/postman
 
-            res.status(400).send({ msg: "No file found" })
+            return res.status(400).send({ msg: "No file found" })
         }
         let uploadedFileURL = await aws.uploadFile(files[0])
 

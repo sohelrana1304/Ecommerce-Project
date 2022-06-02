@@ -40,6 +40,8 @@ router.put("/users/:userId/cart", middleware.authorizatoion, cartController.upda
 
 router.post("/users/:userId/orders", middleware.authorizatoion, orderController.createOrder)
 
+router.put("/users/:userId/orders", middleware.authorizatoion, orderController.updateOrder)
+
 
 
 
