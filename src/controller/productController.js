@@ -3,6 +3,9 @@ const validation = require('../validations/validation')
 const aws = require('./aws')
 
 
+// FEATTURE II - Products API
+
+// To create a product
 const createProduct = async function (req, res) {
 
     try {
@@ -21,6 +24,9 @@ const createProduct = async function (req, res) {
 
         if (!validation.isValid(price)) return res.status(400).send({ status: false, msg: "Price or Price feild is requried" })
 
+        let Pattern = /^[0-9]+\.?[0-9]+$/;
+        if (!(Pattern.test(price))) return res.status(400).send({ status: false, msg: "Not a valid price, enter number only" })
+
         if (price <= 0) return res.status(400).send({ status: false, msg: "Price have to be more than Rupees O [Zero]" })
 
         if (currencyId != "INR") return res.status(400).send({ status: false, msg: "CurrencyId should be only in INR" })
@@ -30,9 +36,6 @@ const createProduct = async function (req, res) {
         if (style) {
             if (!validation.isValid(style)) return res.status(400).send({ status: false, msg: "Style feild is requried" })
         }
-
-        // if (["S", "XS", "M", "X", "L", "XXL", "XL"].indexOf(availableSizes) == -1)
-        //     return res.status(400).send({ status: false, message: "Available sizes should be - S, XS, M, X, L, XXL, XL" })
 
         if (installments) {
             let onlyNumber = /^[0-9]{1,}$/
@@ -66,7 +69,7 @@ const createProduct = async function (req, res) {
             }
             if (Array.isArray(array)) {
                 productRegister['availableSizes'] = array
-           }
+            }
         }
 
         const createProduct = await productModel.create(productRegister)
@@ -81,7 +84,8 @@ const createProduct = async function (req, res) {
 }
 
 
-const getproduct = async (req, res) => {
+// To fetch product details by query
+const getProductByQuery = async (req, res) => {
     try {
         let filterQuery = req.query;
         let { size, name, priceGreaterThan, priceLessThan, priceSort, isFreeShipping } = filterQuery;
@@ -135,11 +139,12 @@ const getproduct = async (req, res) => {
     }
 }
 
-const getProductList = async (req, res) => {
+
+// To fetch a product data
+const getProductbyId = async (req, res) => {
     try {
         let productId = req.params.productId
         // console.log(productId)
-
 
         if (!validation.isValidObjectId(productId)) { return res.status(400).send({ status: false, message: "productId  is not valid" }) }
 
@@ -157,6 +162,9 @@ const getProductList = async (req, res) => {
     }
 }
 
+
+
+// To delete a product
 const deletedProduct = async function (req, res) {
     try {
 
@@ -168,7 +176,7 @@ const deletedProduct = async function (req, res) {
         let deleteBook = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false },
             { $set: { isDeleted: true, deletedAt: new Date() } })
 
-        if (deleteBook == null) return res.status(404).send({ status: false, message: "Product is already deleted" })
+        if (deleteBook == null) return res.status(404).send({ status: false, message: "Product is already deleted or not exist" })
 
         return res.status(200).send({ status: true, message: "Product has been deleted successfully" })
 
@@ -179,17 +187,12 @@ const deletedProduct = async function (req, res) {
     }
 }
 
-// const updateProduct = async function (req, res) {
-//     let data = req.body 
-    
-// }
-
-
+// To update a product
 const updateProduct = async function (req, res) {
     try {
         const body = req.body
-
         productId = req.params.productId
+
         if (!validation.isValidObjectId(productId)) {
             return res.status(400).send({ status: false, msg: `${productId} is invalid` })
         }
@@ -205,9 +208,7 @@ const updateProduct = async function (req, res) {
 
         let updatedbody = {}
 
-
         if (title == "") return res.status(400).send({ status: false, msg: "title not valid" })
-
 
         if (title) {
             if (!validation.isValid(title)) {
@@ -224,7 +225,6 @@ const updateProduct = async function (req, res) {
 
         }
 
-
         if (description == "") return res.status(400).send({ status: false, msg: "description not valid" })
         if (description) {
             if (!validation.isValid(description)) {
@@ -235,7 +235,6 @@ const updateProduct = async function (req, res) {
 
             updatedbody['description'] = description
         }
-
 
         if (price) {
             if (price == "") return res.status(400).send({ status: false, msg: "price not valid" })
@@ -248,7 +247,6 @@ const updateProduct = async function (req, res) {
 
             updatedbody['price'] = price
         }
-
 
         if (availableSizes) {
             let array = availableSizes.split(",").map(x => x.trim()) //this will split the available sizes and give it an array
@@ -274,7 +272,6 @@ const updateProduct = async function (req, res) {
             updatedbody['style'] = style
         }
 
-
         if (installments) {
             let onlyNumber = /^[0-9]{1,}$/
             if (!(onlyNumber.test(installments))) return res.status(400).send({ status: false, message: "Installments should be in number format" })
@@ -283,13 +280,9 @@ const updateProduct = async function (req, res) {
 
 
         let files = req.files;
-        // if (files) {
-        //     if (files.length == 0) return res.status(400).send({ status: false, msg: "No File to update" })
-        // }
 
         if (files && files.length > 0) {
-            console.log(files)
-
+            // console.log(files)
             let uploadedFileURL = await aws.uploadFile(files[0]);
             if (uploadedFileURL) {
                 updatedbody['productImage'] = uploadedFileURL
@@ -298,13 +291,12 @@ const updateProduct = async function (req, res) {
             }
         }
 
-        //check it once.........................................................................................
-        console.log(updatedbody)
+        // console.log(updatedbody)
         if (!validation.isValidRequestBody(updatedbody)) { return res.status(400).send({ status: false, msg: "give some body for update" }) }
 
         const updated = await productModel.findByIdAndUpdate({ _id: productId }, updatedbody, { new: true })
 
-        return res.status(201).send({ status: true, body: updated })
+        return res.status(200).send({ status: true, message:"Product has been updated successfully", body: updated })
 
     } catch (err) {
         console.log("This is the error :", err.message)
@@ -315,6 +307,6 @@ const updateProduct = async function (req, res) {
 
 module.exports.updateProduct = updateProduct
 module.exports.createProduct = createProduct
-module.exports.getproduct = getproduct
-module.exports.getProductList = getProductList
+module.exports.getProductByQuery = getProductByQuery
+module.exports.getProductbyId = getProductbyId
 module.exports.deletedProduct = deletedProduct

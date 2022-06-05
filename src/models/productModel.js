@@ -8,9 +8,9 @@ const productSchema = new mongoose.Schema({
 
     price: { type: Number, required: true }, //number and decimal
 
-    currencyId: { type: String, required: true /* default: "INR" */ },
+    currencyId: { type: String, required: true }, // default: "INR"
 
-    currencyFormat: { type: String, required: true /* default: "₹"  */},
+    currencyFormat: { type: String, required: true }, // default: "₹"
 
     isFreeShipping: { type: Boolean, default: false },
 

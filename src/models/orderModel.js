@@ -4,7 +4,7 @@ const ObjectId = mongoose.Types.ObjectId
 
 const oderSchema = new mongoose.Schema({
 
-  userId: { type: ObjectId, refs: "UserData", required: true },
+  userId: { type: ObjectId, refs: "User", required: true },
 
   items: [{
     productId: { type: ObjectId, refs: "Product", required: true },

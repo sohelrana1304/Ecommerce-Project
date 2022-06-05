@@ -4,8 +4,9 @@ const validation = require("../validations/validation")
 const jwt = require("jsonwebtoken")
 const aws = require("./aws")
 
-//const { json } = require("express/lib/response")
+// FEATURE I - User APIs
 
+// To create a User
 const createUser = async function (req, res) {
     try {
         let data = req.body;
@@ -18,40 +19,27 @@ const createUser = async function (req, res) {
 
         if (!validation.isValid(lname)) return res.status(400).send({ status: false, message: "last name is required or not valid" })
 
-
-
-
-
         if (!validation.isValid(email)) return res.status(400).send({ status: false, message: "email is required or not valid" })
 
         if (!validation.isValidEmail(email)) return res.status(400).send({ status: false, message: "email is not valid" })
 
         let checkEmail = await userModel.findOne({ email: email })
 
-        if (checkEmail) return res.status(409).send({ status: false, msg: "email already exist" })
-
-
-
-
-
+        if (checkEmail) return res.status(400).send({ status: false, msg: "Email already exist" })
 
         if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "email is required or not valid" })
 
         if (!validation.isValidPassword(password)) return res.status(400).send({ status: false, message: "Password length should be 8 to 15 digits and enter atleast one uppercase or lowercase" })
 
-
-
-
         if (!validation.isValid(phone)) return res.status(400).send({ status: false, message: "phone is required or not valid" })
 
-        if (!validation.isValidNumber(phone)) return res.status(400).send({ status: false, message: "phone number is not valid" })
+        if (!validation.isValidNumber(phone)) return res.status(400).send({ status: false, message: "Phone number is not valid" })
 
         let checkPhone = await userModel.findOne({ phone: phone })
 
         if (checkPhone) return res.status(409).send({ status: false, msg: "Phone already exist" })
 
-
-
+        if (!address) return res.status(400).send({ status: false, msg: "Address requried" })
         let addresss = JSON.parse(address)
 
         if (!validation.isValid(addresss.shipping.street)) return res.status(400).send({ status: false, message: "street field is required or not valid" })
@@ -62,9 +50,6 @@ const createUser = async function (req, res) {
 
         if (!validation.isValidPincode(addresss.shipping.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
 
-
-
-
         if (!validation.isValid(addresss.billing.street)) return res.status(400).send({ status: false, message: "street field is required or not valid" })
 
         if (!validation.isValid(addresss.billing.city)) return res.status(400).send({ status: false, message: "city field is required or not valid" })
@@ -74,12 +59,9 @@ const createUser = async function (req, res) {
         if (!validation.isValidPincode(addresss.billing.pincode)) return res.status(400).send({ status: false, message: "PIN code should contain 6 digits only " })
 
 
-
-
         if (files && files.length == 0) {
             //upload to s3 and get the uploaded link
             // res.send the link back to frontend/postman
-
             return res.status(400).send({ msg: "No file found" })
         }
         let uploadedFileURL = await aws.uploadFile(files[0])
@@ -92,7 +74,7 @@ const createUser = async function (req, res) {
 
         data.address = addresss
         let createUser = await userModel.create(data)
-        return res.status(201).send({ status: true, message: "user created successfully", createUser })
+        return res.status(201).send({ status: true, message: "User created successfully", createUser })
 
     }
     catch (err) {
@@ -102,10 +84,10 @@ const createUser = async function (req, res) {
 }
 
 
+// To login for a User
 const loginUser = async (req, res) => {
     try {
         let data = req.body
-
 
         let { email, password } = data
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, msg: "Email and password is required to login" })
@@ -114,23 +96,20 @@ const loginUser = async (req, res) => {
 
         if (!validation.isValidEmail(email)) return res.status(400).send({ status: false, message: "email is not valid" })
 
-        if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "email is required or not valid" })
+        if (!validation.isValid(password)) return res.status(400).send({ status: false, message: "Password is required or not valid" })
 
         if (!validation.isValidPassword(password)) return res.status(400).send({ status: false, message: "Password length should be 8 to 15 digits and enter atleast one uppercase or lowercase" })
 
 
-
-
-        let getUserData = await userModel.findOne({ email: data.email })
+        let getUserData = await userModel.findOne({ email: email })
         if (!getUserData) return res.status(401).send({ status: false, msg: "Invalid credentials" })
         let ps = bcrypt.compareSync(password, getUserData.password)  //Sync
         //console.log(ps)
-        if (!ps) return res.status(401).send({ status: false, msg: "ps wrong" })
+        if (!ps) return res.status(401).send({ status: false, msg: "Password is wrong" })
 
         let token = jwt.sign({
             userID: getUserData._id,
         }, "Uranium Project-5", { expiresIn: '30d' })
-
 
 
         res.status(200).send({ status: true, message: "User Login succesfully", data: { userId: getUserData._id, token: token } },)
@@ -139,18 +118,18 @@ const loginUser = async (req, res) => {
     }
 }
 
-const getUserList = async (req, res) => {
+
+// To fetch a user's details
+const getUserById = async (req, res) => {
     try {
         let userId = req.params.userId
-        // console.log(userId)
-        let tokenId = req.userId
-        //console.log(tokenId)
 
-        if ((!validation.isValidObjectId(userId) && !validation.isValidObjectId(tokenId))) return res.status(400).send({ status: false, message: "userId or tokenid is not valid" });;
+        if (!validation.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "userId is not valid" });
 
         let checkData = await userModel.findById({ _id: userId });
         if (!checkData) return res.status(404).send({ status: false, msg: "There is no user exist with this id" });
 
+        let tokenId = req.userId
         if (!(userId == tokenId)) return res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
 
         return res.status(200).send({ status: true, message: 'User profile details', data: checkData });
@@ -162,19 +141,11 @@ const getUserList = async (req, res) => {
 }
 
 
-
-const updateUserList = async (req, res) => {
+// To update a user
+const updateUser = async (req, res) => {
     try {
-        // Validate body
         const body = req.body
-        //const reqBody = JSON.parse(req.body.data)
-
-
-
-        // if (!validation.isValidRequestBody(body)) {
-        //     return res.status(400).send({ status: false, msg: "Details must be present to update" })
-        // }
-
+    
         // Validate params
         userId = req.params.userId
         if (!validation.isValidObjectId(userId)) {
@@ -197,10 +168,9 @@ const updateUserList = async (req, res) => {
 
         let updatedData = {}
 
-        // console.log(fname)
+
         if (fname == "") return res.status(400).send({ status: false, msg: "fname not valid" })
 
-        // console.log("hyuoy")
         if (fname) {
             if (!validation.isValid(fname)) {
                 return res.status(400).send({ status: false, msg: "not valid fname" })
@@ -212,7 +182,6 @@ const updateUserList = async (req, res) => {
 
         }
 
-        // console.log("iuniuin")
         if (lname == "") return res.status(400).send({ status: false, msg: "lname not valid" })
         if (lname) {
             if (!validation.isValid(lname)) {
@@ -229,7 +198,6 @@ const updateUserList = async (req, res) => {
             if (!validation.isValidEmail(email)) {
                 return res.status(400).send({ status: false, msg: "Invalid email id" })
             }
-
 
             // Duplicate email
             const duplicatemail = await userModel.find({ email: email })
@@ -315,12 +283,12 @@ const updateUserList = async (req, res) => {
         }
 
         let files = req.files;
-        if (files) {
-            if (files.length == 0) return res.status(400).send({ status: false, msg: "No File to update" })
+        if (!files) {
+            if (files.length == 0) return res.status(400).send({ status: false, msg: "No File found to update profile image" })
         }
 
         if (files && files.length > 0) {
-            console.log(files)
+            // console.log(files)
 
             let uploadedFileURL = await aws.uploadFile(files[0]);
             if (uploadedFileURL) {
@@ -330,21 +298,20 @@ const updateUserList = async (req, res) => {
             }
         }
 
-        //check it once.........................................................................................
-        if (!validation.isValidRequestBody(updatedData)) { return res.status(400).send({ status: false, msg: "give some body for update" }) }
+        if (!validation.isValidRequestBody(updatedData)) { return res.status(400).send({ status: false, msg: "Input some data to update user" }) }
 
-        const updated = await userModel.findOneAndUpdate({ _id: userId }, updatedData)
+        const updated = await userModel.findOneAndUpdate({ _id: userId }, updatedData, {new: true})
 
-        return res.status(201).send({ status: true, data: updated })
+        return res.status(201).send({ status: true, message:"User updated successfully", data: updated })
+        
     } catch (err) {
         console.log(err)
         return res.status(500).send({ message: err.message });
     };
 }
 
+
 module.exports.createUser = createUser
 module.exports.loginUser = loginUser
-module.exports.getUserList = getUserList
-module.exports.updateUserList = updateUserList
-
-
+module.exports.getUserById = getUserById
+module.exports.updateUser = updateUser
